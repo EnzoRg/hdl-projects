@@ -1,0 +1,98 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+
+entity hamming is
+    Port ( m3 : in STD_LOGIC;
+        m5 : in STD_LOGIC;
+        m6 : in STD_LOGIC;
+        m7 : in STD_LOGIC;
+        m9 : in STD_LOGIC;
+        l0 : out STD_LOGIC;
+        l1 : out STD_LOGIC;
+        l2 : out STD_LOGIC;
+        l3 : out STD_LOGIC;
+        l4 : out STD_LOGIC;
+        l5 : out STD_LOGIC;
+        l6 : out STD_LOGIC;
+        l7 : out STD_LOGIC;
+        s0 : out STD_LOGIC;
+        s1 : out STD_LOGIC;
+        s2 : out STD_LOGIC;
+        s3 : out STD_LOGIC;
+        s4 : out STD_LOGIC;
+        s5 : out STD_LOGIC;
+        s6 : out STD_LOGIC;
+        t: out STD_LOGIC;
+        error3 : in STD_LOGIC;
+        error5 : in STD_LOGIC;
+        error6 : in STD_LOGIC);
+end hamming;
+architecture Behavioral of hamming is
+SIGNAL k2 : STD_LOGIC;
+SIGNAL k4 : STD_LOGIC;
+SIGNAL k8 : STD_LOGIC;
+SIGNAL k1 : STD_LOGIC;
+SIGNAL em3 : STD_LOGIC;
+SIGNAL em5 : STD_LOGIC;
+SIGNAL em6 : STD_LOGIC;
+SIGNAL c0 : STD_LOGIC;
+SIGNAL c1 : STD_LOGIC;
+SIGNAL c2 : STD_LOGIC;
+SIGNAL c3 : STD_LOGIC;
+SIGNAL f3 : STD_LOGIC;
+SIGNAL f5 : STD_LOGIC;
+SIGNAL f6 : STD_LOGIC;
+SIGNAL f7 : STD_LOGIC;
+SIGNAL f9 : STD_LOGIC;
+
+begin
+--Tx
+
+k1 <= (m3 XOR m5 XOR m7 XOR m9);
+k2 <= (m7 XOR m6 XOR m3);
+k4 <= (m7 XOR m6 XOR m5);
+k8 <= (m9);
+
+--Generador de errores
+em3 <= (m3 XOR error3);
+em5 <= (m5 XOR error5);
+em6 <= (m6 XOR error6);
+
+--Indicador de error con led
+l5 <= error3;
+l6 <= error5;
+l7 <= error6;
+
+--Rx
+c3 <= (em3 XOR em5 XOR m7 XOR m9 XOR k1);
+c2 <= (m7 XOR em6 XOR em3 XOR k2);
+c1 <= (m7 XOR em6 XOR em5 XOR k4);
+c0 <= (m9 XOR k8);
+
+--Decodificador Display
+s0 <=( c2 or (c1 and c3) or (c0 and not(c1)) or (not(c1) and not(c3)));
+s1 <= not(c1)or( c2 xnor c3);
+s2 <= not(c2) or c3 or c1;
+s3 <= (c2 and not(c3)) or (not(c1) and not(c3)) or (not(c0) and not(c1) and c2) or
+(c1 and not(c2) and (c3));
+s4 <= (not(c1) and not(c3)) or (c2 and not(c3));
+s5 <= c0 or (not(c2) and not(c3)) or (c1 and not(c2)) or (c1 and not(c3));
+s6 <= c0 or (c1 and not(c2)) or (c2 and not(c3)) or (not(c1) and c2);
+t <='0';
+
+--Codificador
+f3 <= ( not(c0) and not(c1) and c2 and c3);
+f5 <= ( not(c0) and c1 and not(c2) and c3);
+f6 <= ( not(c0) and c1 and c2 and not(c3));
+f7 <= ( not(c0) and c1 and c2 and c3);
+f9 <= ( not(c3) and not(c2) and not(c1) and c0);
+
+--Dato Corregido
+l0 <= (em3 XOR f3);
+l1 <= (em5 XOR f5);
+l2 <= (em6 XOR f6);
+l3 <= (m7 XOR f7);
+l4 <= (m9 XOR f9);
+end Behavioral;
